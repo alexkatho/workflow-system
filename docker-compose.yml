@@ -5,14 +5,14 @@ services:
     image: postgres:17
     container_name: workflow-db
     environment:
-      POSTGRES_DB: workflow
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: garfield26
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./db-init:/docker-entrypoint-initdb.d   # hier wird init.sql ausgeführt
+      - ./db-init:/docker-entrypoint-initdb.d   # init.sql wird automatisch ausgeführt
 
   app:
     build: .
@@ -22,10 +22,11 @@ services:
     depends_on:
       - db
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/workflow
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: garfield26
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:${POSTGRES_PORT}/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: create
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
 
 volumes:
-  pgdata:   # benanntes Volume für persistente Postgres-Daten
+  pgdata:
