@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:17
+    container_name: workflow-db
+    environment:
+      POSTGRES_DB: workflow
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: garfield26
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d   # hier wird init.sql ausgeführt
+
+  app:
+    build: .
+    container_name: workflow-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/workflow
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: garfield26
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create
+
+volumes:
+  pgdata:   # benanntes Volume für persistente Postgres-Daten
