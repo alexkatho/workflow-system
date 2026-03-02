@@ -1,9 +1,10 @@
-HELP.md
+# Maven / Build
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# IDEs
 ### STS ###
 .apt_generated
 .classpath
@@ -31,3 +32,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Environment files (Secrets)
+.env
+.env.*  # z.B. .env.prod, .env.dev
+
+# Database initialization / generated files (optional)
+db-init/*.sql
+
+# Logs
+*.log
