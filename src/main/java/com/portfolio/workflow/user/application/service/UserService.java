@@ -37,20 +37,22 @@ public class UserService {
 	 * Erstellt einen neuen User, inklusive Passwort Hash und DEFAULT Status ACTIVE
 	 */
 	public User createUser(String username, String email, String rawPassword, Role role) {
+		
 		String hashed = passwordEncoder.encode(rawPassword);
 
-		// Permissions aus Role ableiten
-		Set<Permission> perms = switch (role) {
-		case USER -> Set.of(Permission.CREATE_REQUEST);
-		case MANAGER -> Set.of(Permission.CREATE_REQUEST, Permission.APPROVE_REQUEST);
-		case ADMIN -> Set.of(Permission.CREATE_REQUEST, Permission.APPROVE_REQUEST, Permission.MANAGE_USERS,
-				Permission.VIEW_AUDIT_LOG);
-		};
+	    User userDomain = new User(
+	        username,
+	        email,
+	        hashed,
+	        role,
+	        role.getPermissions(),
+	        AccountStatus.ACTIVE
+	    );
 
-		User userDomain = new User(username, email, hashed, role, perms, AccountStatus.ACTIVE);
-		UserEntity entity = UserPersistenceMapper.toEntity(userDomain);
-		UserEntity saved = userRepository.save(entity);
-		return UserPersistenceMapper.toDomain(saved);
+	    UserEntity entity = UserPersistenceMapper.toEntity(userDomain);
+	    UserEntity saved = userRepository.save(entity);
+
+	    return UserPersistenceMapper.toDomain(saved);
 	}
 
 	/** Aktualisiert bestehenden User: Rolle, Status, Passwortänderung */
