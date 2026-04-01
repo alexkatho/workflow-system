@@ -19,18 +19,16 @@ public class WebSecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 		http.csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(
-						auth -> auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
-								.permitAll().anyRequest().authenticated())
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+						.permitAll().anyRequest().authenticated())
 				.httpBasic(Customizer.withDefaults());
 
 		return http.build();
 	}
-	
+
 	@Bean
-	public AuthenticationManager authenticationManager(
-	        AuthenticationConfiguration config
-	) throws Exception {
-	    return config.getAuthenticationManager();
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+		return config.getAuthenticationManager();
 	}
 }
