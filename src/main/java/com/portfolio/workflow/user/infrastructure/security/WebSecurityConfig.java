@@ -8,24 +8,44 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.portfolio.workflow.user.infrastructure.security.jwt.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
-	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	 private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-		http.csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
-						.permitAll().anyRequest().authenticated())
-				.httpBasic(Customizer.withDefaults());
+	    public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+	        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+	    }
 
-		return http.build();
-	}
+	    @Bean
+	    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+	        http
+	                .csrf(csrf -> csrf.disable())
+	                .sessionManagement(session ->
+	                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+	                )
+	                .authorizeHttpRequests(auth -> auth
+	                        .requestMatchers(
+	                                "/api/auth/**",
+	                                "/v3/api-docs/**",
+	                                "/swagger-ui/**",
+	                                "/swagger-ui.html"
+	                        ).permitAll()
+	                        .anyRequest().authenticated()
+	                )
+	                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+	        return http.build();
+	    }
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
