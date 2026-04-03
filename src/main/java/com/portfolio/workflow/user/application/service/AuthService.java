@@ -7,7 +7,7 @@ import com.portfolio.workflow.user.application.dto.AuthResponseDto;
 import com.portfolio.workflow.user.application.dto.LoginRequestDto;
 import com.portfolio.workflow.user.application.exception.InactiveUserException;
 import com.portfolio.workflow.user.application.exception.InvalidCredentialsException;
-import com.portfolio.workflow.user.domain.repository.UserJpaRepository;
+import com.portfolio.workflow.user.domain.repository.UserRepository;
 import com.portfolio.workflow.user.infrastructure.security.jwt.JwtService;
 
 /**
@@ -16,11 +16,11 @@ import com.portfolio.workflow.user.infrastructure.security.jwt.JwtService;
 @Service
 public class AuthService {
 
-    private final UserJpaRepository userRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public AuthService(UserJpaRepository userRepository,
+    public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService) {
         this.userRepository = userRepository;

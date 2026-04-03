@@ -5,7 +5,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.portfolio.workflow.user.domain.repository.UserJpaRepository;
+import com.portfolio.workflow.user.domain.repository.UserRepository;
+import com.portfolio.workflow.user.infrastructure.repository.UserJpaRepository;
 
 /**
  * Spring Security Service zum Laden von Usern aus der Datenbank.

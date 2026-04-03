@@ -1,5 +1,6 @@
 package com.portfolio.workflow.user.application.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -14,9 +15,7 @@ import com.portfolio.workflow.user.domain.model.AccountStatus;
 import com.portfolio.workflow.user.domain.model.Permission;
 import com.portfolio.workflow.user.domain.model.Role;
 import com.portfolio.workflow.user.domain.model.User;
-import com.portfolio.workflow.user.domain.repository.UserJpaRepository;
-import com.portfolio.workflow.user.infrastructure.mapper.UserPersistenceMapper;
-import com.portfolio.workflow.user.infrastructure.persistence.UserEntity;
+import com.portfolio.workflow.user.domain.repository.UserRepository;
 
 /**
  * Service für Benutzerverwaltung.
@@ -29,10 +28,10 @@ import com.portfolio.workflow.user.infrastructure.persistence.UserEntity;
 @Service
 public class UserService {
 
-    private final UserJpaRepository userRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserJpaRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -54,10 +53,9 @@ public class UserService {
         validateUniqueUsername(username);
 
         String hashed = passwordEncoder.encode(rawPassword);
-
         Set<Permission> permissions = derivePermissions(role);
 
-        User userDomain = new User(
+        User user = new User(
                 username,
                 email,
                 hashed,
@@ -66,8 +64,7 @@ public class UserService {
                 AccountStatus.ACTIVE
         );
 
-        UserEntity savedEntity = userRepository.save(UserPersistenceMapper.toEntity(userDomain));
-        return UserPersistenceMapper.toDomain(savedEntity);
+        return userRepository.save(user);
     }
 
     /**
@@ -88,33 +85,48 @@ public class UserService {
                            String newEmail,
                            String newUsername) {
 
-        UserEntity entity = userRepository.findById(userId)
+        User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        if (newEmail != null && !newEmail.equalsIgnoreCase(entity.getEmail())) {
+        String email = existingUser.getEmail();
+        String username = existingUser.getUsername();
+        String passwordHash = existingUser.getPasswordHash();
+        Role role = existingUser.getRole();
+        AccountStatus accountStatus = existingUser.getStatus();
+
+        if (newEmail != null && !newEmail.equalsIgnoreCase(existingUser.getEmail())) {
             validateUniqueEmail(newEmail);
-            entity.setEmail(newEmail);
+            email = newEmail;
         }
 
-        if (newUsername != null && !newUsername.equalsIgnoreCase(entity.getUsername())) {
+        if (newUsername != null && !newUsername.equalsIgnoreCase(existingUser.getUsername())) {
             validateUniqueUsername(newUsername);
-            entity.setUsername(newUsername);
+            username = newUsername;
         }
 
         if (newRole != null) {
-            entity.setRole(newRole);
+            role = newRole;
         }
 
         if (status != null) {
-            entity.setStatus(status);
+            accountStatus = status;
         }
 
         if (newRawPassword != null && !newRawPassword.isBlank()) {
-            entity.setPasswordHash(passwordEncoder.encode(newRawPassword));
+            passwordHash = passwordEncoder.encode(newRawPassword);
         }
 
-        UserEntity updatedEntity = userRepository.save(entity);
-        return UserPersistenceMapper.toDomain(updatedEntity);
+        User updatedUser = new User(
+                existingUser.getId(),
+                username,
+                email,
+                passwordHash,
+                role,
+                derivePermissions(role),
+                accountStatus
+        );
+
+        return userRepository.save(updatedUser);
     }
 
     /**
@@ -124,8 +136,7 @@ public class UserService {
      * @return optionaler Benutzer
      */
     public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .map(UserPersistenceMapper::toDomain);
+        return userRepository.findByEmail(email);
     }
 
     /**
@@ -135,8 +146,16 @@ public class UserService {
      * @return optionaler Benutzer
      */
     public Optional<User> findById(UUID userId) {
-        return userRepository.findById(userId)
-                .map(UserPersistenceMapper::toDomain);
+        return userRepository.findById(userId);
+    }
+
+    /**
+     * Gibt alle Benutzer zurück.
+     *
+     * @return Liste aller Benutzer
+     */
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
     /**

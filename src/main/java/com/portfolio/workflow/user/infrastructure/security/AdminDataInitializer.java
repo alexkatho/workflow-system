@@ -8,8 +8,9 @@ import org.springframework.stereotype.Component;
 
 import com.portfolio.workflow.user.domain.model.AccountStatus;
 import com.portfolio.workflow.user.domain.model.Role;
-import com.portfolio.workflow.user.domain.repository.UserJpaRepository;
+import com.portfolio.workflow.user.domain.repository.UserRepository;
 import com.portfolio.workflow.user.infrastructure.persistence.UserEntity;
+import com.portfolio.workflow.user.infrastructure.repository.UserJpaRepository;
 
 /**
  * Initialisiert einen Default-Admin Benutzer beim Start der Anwendung.
