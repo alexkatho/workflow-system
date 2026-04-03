@@ -1,5 +1,8 @@
 package com.portfolio.workflow.user.application.dto;
 
+import com.portfolio.workflow.user.domain.model.AccountStatus;
+import com.portfolio.workflow.user.domain.model.Role;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
@@ -21,6 +24,6 @@ public record UpdateUserRequestDto(
         @Size(min = 8, message = "Passwort muss mindestens 8 Zeichen haben")
         String password,
 
-        String role,      // optional: USER, MANAGER, ADMIN
-        String status     // optional: ACTIVE, INACTIVE, etc.
+        Role role,      // optional: USER, MANAGER, ADMIN
+        AccountStatus status     // optional: ACTIVE, INACTIVE, etc.
 ) {}

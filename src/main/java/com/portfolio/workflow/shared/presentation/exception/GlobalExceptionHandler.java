@@ -1,24 +1,27 @@
 package com.portfolio.workflow.shared.presentation.exception;
 
+import java.time.LocalDateTime;
+import java.util.stream.Collectors;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
 import com.portfolio.workflow.user.application.exception.DuplicateEmailException;
 import com.portfolio.workflow.user.application.exception.DuplicateUsernameException;
 import com.portfolio.workflow.user.application.exception.InactiveUserException;
 import com.portfolio.workflow.user.application.exception.InvalidCredentialsException;
 import com.portfolio.workflow.user.application.exception.UserNotFoundException;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authorization.AuthorizationDeniedException;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import java.time.LocalDateTime;
-import java.util.stream.Collectors;
 
 /**
  * Zentrale Exception-Behandlung für REST-Endpunkte.
@@ -95,6 +98,20 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT,
                 "Datenbank-Integritätsfehler",
                 request.getRequestURI());
+    }
+    
+    /**
+     * Falls unsupportede ROLE übergeben, dann BAD_REQUEST HTTP 400
+     * 
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+                                                                      HttpServletRequest request) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "Ungültiger Request-Inhalt oder Enum-Wert",
+                request.getRequestURI()
+        );
     }
 
     /**

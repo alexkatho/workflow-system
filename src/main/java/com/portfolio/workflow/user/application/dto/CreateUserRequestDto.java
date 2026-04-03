@@ -1,6 +1,9 @@
 package com.portfolio.workflow.user.application.dto;
+import com.portfolio.workflow.user.domain.model.Role;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -23,6 +26,6 @@ public record CreateUserRequestDto(
         @Size(min = 8, message = "Passwort muss mindestens 8 Zeichen haben")
         String password,
 
-        @NotBlank(message = "Rolle darf nicht leer sein")
-        String role // z.B. USER, MANAGER, ADMIN
+        @NotNull(message = "Rolle muss angegeben werden")
+        Role role
 ) {}

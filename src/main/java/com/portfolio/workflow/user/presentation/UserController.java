@@ -35,7 +35,7 @@ public class UserController {
                 dto.username(),
                 dto.email(),
                 dto.password(),
-                Role.valueOf(dto.role())
+                dto.role()
         );
         return ResponseEntity.ok(UserApplicationMapper.toResponseDto(user));
     }
@@ -46,8 +46,8 @@ public class UserController {
                                                       @Valid @RequestBody UpdateUserRequestDto dto) {
         User updatedUser = userService.updateUser(
                 id,
-                dto.role() != null ? Role.valueOf(dto.role()) : null,
-                dto.status() != null ? AccountStatus.valueOf(dto.status()) : null,
+                dto.role(),
+                dto.status(),
                 dto.password(),
                 dto.email(),
                 dto.username()
