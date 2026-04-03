@@ -14,76 +14,90 @@ import io.jsonwebtoken.security.Keys;
 
 /**
  * Service für Erstellung und Validierung von JWT Tokens.
- *
- * <p>
- * Verantwortlich für:
- * - Token generieren
- * - Token validieren
- * - Claims extrahieren
- * </p>
  */
 @Service
 public class JwtService {
 
-    // 🔐 Secret Key (später in application.yml auslagern!)
-	private static final String SECRET =
-	        "my-super-secret-key-my-super-secret-key";
+    private final JwtProperties jwtProperties;
 
-    private final long EXPIRATION = 1000 * 60 * 60; // 1 Stunde
-
-    
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+    public JwtService(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
     }
+
     /**
-     * Generiert ein JWT Token für einen User
+     * Generiert ein JWT für einen Benutzer.
+     *
+     * @param email E-Mail des Benutzers
+     * @param role Rolle des Benutzers
+     * @return signiertes JWT
      */
     public String generateToken(String email, String role) {
-
         return Jwts.builder()
-                .subject(email) // "sub"
+                .subject(email)
                 .claim("role", role)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                .expiration(new Date(System.currentTimeMillis() + jwtProperties.expiration()))
                 .signWith(getSigningKey())
                 .compact();
     }
 
     /**
-     * Extrahiert Username (Email) aus Token
+     * Extrahiert den Benutzernamen bzw. die E-Mail aus dem JWT.
+     *
+     * @param token JWT
+     * @return Subject des Tokens
      */
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
 
     /**
-     * Extrahiert Rolle aus Token
+     * Extrahiert die Rolle aus dem JWT.
+     *
+     * @param token JWT
+     * @return Rolle als String
      */
     public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }
 
     /**
-     * Validiert Token (Signatur + Ablauf)
+     * Prüft, ob ein JWT gültig ist.
+     *
+     * @param token JWT
+     * @return true, wenn Signatur und Ablaufzeit gültig sind
      */
     public boolean isTokenValid(String token) {
         try {
-            extractAllClaims(token); // wirft Exception wenn ungültig
+            extractAllClaims(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (JwtException | IllegalArgumentException ex) {
             return false;
         }
     }
 
     /**
-     * Parsed alle Claims
+     * Liest alle Claims aus einem signierten JWT.
+     *
+     * @param token JWT
+     * @return Claims des Tokens
      */
     private Claims extractAllClaims(String token) {
-
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    /**
+     * Erstellt den HMAC Signing Key aus der konfigurierten Secret-Property.
+     *
+     * @return SecretKey für JWT Signatur und Verifikation
+     */
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(
+                jwtProperties.secret().getBytes(StandardCharsets.UTF_8)
+        );
     }
 }

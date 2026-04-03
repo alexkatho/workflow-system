@@ -20,13 +20,13 @@ public class UserApplicationMapper {
 
 	/** CreateUserRequestDto → Domain User (ohne ID, Passwort noch raw) */
 	public static User toDomain(CreateUserRequestDto dto, String hashedPassword) {
-		Set<Permission> perms = switch (Role.valueOf(dto.role())) {
+		Set<Permission> perms = switch (dto.role()) {
 		case USER -> Set.of(Permission.CREATE_REQUEST);
 		case MANAGER -> Set.of(Permission.CREATE_REQUEST, Permission.APPROVE_REQUEST);
 		case ADMIN -> Set.of(Permission.CREATE_REQUEST, Permission.APPROVE_REQUEST, Permission.MANAGE_USERS,
 				Permission.VIEW_AUDIT_LOG);
 		};
-		return new User(dto.username(), dto.email(), hashedPassword, Role.valueOf(dto.role()), perms,
+		return new User(dto.username(), dto.email(), hashedPassword, dto.role(), perms,
 				AccountStatus.ACTIVE);
 	}
 
@@ -37,8 +37,8 @@ public class UserApplicationMapper {
 		return new User(existingUser.getId(), dto.username() != null ? dto.username() : existingUser.getUsername(),
 				dto.email() != null ? dto.email() : existingUser.getEmail(),
 				hashedPassword != null ? hashedPassword : existingUser.getPasswordHash(),
-				dto.role() != null ? Role.valueOf(dto.role()) : existingUser.getRole(), existingUser.getPermissions(), 
-				dto.status() != null ? AccountStatus.valueOf(dto.status()) : existingUser.getStatus());
+				dto.role() != null ? dto.role() : existingUser.getRole(), existingUser.getPermissions(), 
+				dto.status() != null ? dto.status() : existingUser.getStatus());
 	}
 
 	/** Domain User → UserResponseDto */
