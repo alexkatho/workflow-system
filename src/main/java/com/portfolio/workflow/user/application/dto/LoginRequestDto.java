@@ -18,4 +18,4 @@ public record LoginRequestDto(
         @NotBlank(message = "Passwort darf nicht leer sein")
         String password
 ) {
-}
+} 

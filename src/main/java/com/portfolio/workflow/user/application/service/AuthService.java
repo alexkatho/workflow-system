@@ -5,20 +5,13 @@ import org.springframework.stereotype.Service;
 
 import com.portfolio.workflow.user.application.dto.AuthResponseDto;
 import com.portfolio.workflow.user.application.dto.LoginRequestDto;
+import com.portfolio.workflow.user.application.exception.InactiveUserException;
+import com.portfolio.workflow.user.application.exception.InvalidCredentialsException;
 import com.portfolio.workflow.user.domain.repository.UserJpaRepository;
 import com.portfolio.workflow.user.infrastructure.security.jwt.JwtService;
 
 /**
  * Service für Authentifizierung und JWT-Erzeugung.
- *
- * <p>
- * Verantwortlich für:
- * <ul>
- *   <li>Benutzer anhand der Email laden</li>
- *   <li>Passwort gegen den gespeicherten Hash prüfen</li>
- *   <li>JWT Token erzeugen</li>
- * </ul>
- * </p>
  */
 @Service
 public class AuthService {
@@ -36,16 +29,15 @@ public class AuthService {
     }
 
     /**
-     * Authentifiziert einen Benutzer mit Email und Passwort.
+     * Authentifiziert einen Benutzer und erzeugt ein JWT.
      *
-     * @param request Login-Daten
-     * @return JWT Token als Response DTO
-     * @throws RuntimeException wenn Benutzer nicht existiert oder Passwort ungültig ist
+     * @param request Login-Request mit Email und Passwort
+     * @return JWT Response
      */
     public AuthResponseDto login(LoginRequestDto request) {
 
         var userEntity = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("Ungültige Email oder Passwort"));
+                .orElseThrow(InvalidCredentialsException::new);
 
         boolean passwordMatches = passwordEncoder.matches(
                 request.password(),
@@ -53,11 +45,11 @@ public class AuthService {
         );
 
         if (!passwordMatches) {
-            throw new RuntimeException("Ungültige Email oder Passwort");
+            throw new InvalidCredentialsException();
         }
 
         if (!userEntity.getStatus().isActive()) {
-            throw new RuntimeException("Benutzerkonto ist nicht aktiv");
+            throw new InactiveUserException(userEntity.getEmail());
         }
 
         String token = jwtService.generateToken(
