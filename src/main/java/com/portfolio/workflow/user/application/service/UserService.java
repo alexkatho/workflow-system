@@ -85,8 +85,7 @@ public class UserService {
                            String newEmail,
                            String newUsername) {
 
-        User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        User existingUser = findExistingUser(userId);
 
         String email = existingUser.getEmail();
         String username = existingUser.getUsername();
@@ -138,8 +137,7 @@ public class UserService {
      * @throws UserNotFoundException wenn der Benutzer nicht existiert
      */
     public User updateUserStatus(UUID userId, AccountStatus status) {
-        User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        User existingUser = findExistingUser(userId);
 
         User updatedUser = new User(
                 existingUser.getId(),
@@ -152,6 +150,38 @@ public class UserService {
         );
 
         return userRepository.save(updatedUser);
+    }
+    
+    /**
+     * Aktualisiert das Passwort eines bestehenden Benutzers.
+     *
+     * @param userId ID des Benutzers
+     * @param newRawPassword neues Klartext-Passwort
+     * @return aktualisierter Benutzer
+     * @throws UserNotFoundException wenn der Benutzer nicht existiert
+     */
+    public User updateUserPassword(UUID userId, String newRawPassword) {
+        User existingUser = findExistingUser(userId);
+
+        String hashedPassword = passwordEncoder.encode(newRawPassword);
+
+        User updatedUser = new User(
+                existingUser.getId(),
+                existingUser.getUsername(),
+                existingUser.getEmail(),
+                hashedPassword,
+                existingUser.getRole(),
+                existingUser.getPermissions(),
+                existingUser.getStatus()
+        );
+
+        return userRepository.save(updatedUser);
+    }
+    
+    private User findExistingUser(UUID userId) {
+    	User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+    	return existingUser;
     }
 
     /**
