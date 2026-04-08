@@ -153,6 +153,31 @@ public class UserService {
     }
     
     /**
+     * Aktualisiert den Status eines bestehenden Benutzers.
+     *
+     * @param userId ID des Benutzers
+     * @param newRole neue Rolle
+     * @return aktualisierter Benutzer
+     * @throws UserNotFoundException wenn der Benutzer nicht existiert
+     */
+    public User updateUserRole(UUID userId, Role newRole) {
+        User existingUser = findExistingUser(userId);
+
+        User updatedUser = new User(
+                existingUser.getId(),
+                existingUser.getUsername(),
+                existingUser.getEmail(),
+                existingUser.getPasswordHash(),
+                newRole,
+                derivePermissions(newRole),
+                existingUser.getStatus()
+        );
+
+        return userRepository.save(updatedUser);
+    }
+    
+    
+    /**
      * Aktualisiert das Passwort eines bestehenden Benutzers.
      *
      * @param userId ID des Benutzers

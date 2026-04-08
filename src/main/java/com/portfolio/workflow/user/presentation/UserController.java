@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.portfolio.workflow.user.application.dto.CreateUserRequestDto;
 import com.portfolio.workflow.user.application.dto.UpdateUserPasswordRequestDto;
 import com.portfolio.workflow.user.application.dto.UpdateUserRequestDto;
+import com.portfolio.workflow.user.application.dto.UpdateUserRoleRequestDto;
 import com.portfolio.workflow.user.application.dto.UpdateUserStatusRequestDto;
 import com.portfolio.workflow.user.application.dto.UserResponseDto;
 import com.portfolio.workflow.user.application.mapper.UserApplicationMapper;
@@ -86,6 +87,17 @@ public class UserController {
     public ResponseEntity<UserResponseDto> updateUserPassword(@PathVariable UUID id,
                                                               @Valid @RequestBody UpdateUserPasswordRequestDto dto) {
         User updatedUser = userService.updateUserPassword(id, dto.password());
+        return ResponseEntity.ok(UserApplicationMapper.toResponseDto(updatedUser));
+    }
+    
+    /**
+     * Aktualisiert die Rolle eines Benutzers (nur für ADMIN).
+     */
+    @PatchMapping("/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponseDto> updateUserRole(@PathVariable UUID id,
+                                                          @Valid @RequestBody UpdateUserRoleRequestDto dto) {
+        User updatedUser = userService.updateUserRole(id, dto.role());
         return ResponseEntity.ok(UserApplicationMapper.toResponseDto(updatedUser));
     }
 
