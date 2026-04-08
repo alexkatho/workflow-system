@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.portfolio.workflow.user.application.dto.CreateUserRequestDto;
 import com.portfolio.workflow.user.application.dto.UpdateUserRequestDto;
+import com.portfolio.workflow.user.application.dto.UpdateUserStatusRequestDto;
 import com.portfolio.workflow.user.application.dto.UserResponseDto;
 import com.portfolio.workflow.user.application.mapper.UserApplicationMapper;
 import com.portfolio.workflow.user.application.service.UserService;
@@ -61,6 +63,17 @@ public class UserController {
                 dto.username()
         );
 
+        return ResponseEntity.ok(UserApplicationMapper.toResponseDto(updatedUser));
+    }
+    
+    /**
+     * Aktualisiert den Status eines Benutzers (nur für ADMIN).
+     */
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponseDto> updateUserStatus(@PathVariable UUID id,
+                                                            @Valid @RequestBody UpdateUserStatusRequestDto dto) {
+        User updatedUser = userService.updateUserStatus(id, dto.status());
         return ResponseEntity.ok(UserApplicationMapper.toResponseDto(updatedUser));
     }
 

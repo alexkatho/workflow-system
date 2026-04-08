@@ -128,6 +128,31 @@ public class UserService {
 
         return userRepository.save(updatedUser);
     }
+    
+    /**
+     * Aktualisiert den Status eines bestehenden Benutzers.
+     *
+     * @param userId ID des Benutzers
+     * @param status neuer Status
+     * @return aktualisierter Benutzer
+     * @throws UserNotFoundException wenn der Benutzer nicht existiert
+     */
+    public User updateUserStatus(UUID userId, AccountStatus status) {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        User updatedUser = new User(
+                existingUser.getId(),
+                existingUser.getUsername(),
+                existingUser.getEmail(),
+                existingUser.getPasswordHash(),
+                existingUser.getRole(),
+                existingUser.getPermissions(),
+                status
+        );
+
+        return userRepository.save(updatedUser);
+    }
 
     /**
      * Sucht einen Benutzer anhand seiner E-Mail-Adresse.
