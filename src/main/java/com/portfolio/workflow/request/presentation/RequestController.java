@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +25,7 @@ import com.portfolio.workflow.request.domain.model.Request;
 import com.portfolio.workflow.request.domain.model.RequestStatus;
 import com.portfolio.workflow.user.application.exception.CurrentUserNotFoundException;
 import com.portfolio.workflow.user.application.service.UserService;
+import com.portfolio.workflow.user.domain.model.User;
 
 import jakarta.validation.Valid;
 
@@ -125,8 +126,27 @@ public class RequestController {
 
         return ResponseEntity.ok(RequestApplicationMapper.toResponseDto(updatedRequest));
     }
+    
+    /**
+     * Storniert einen offenen Request.
+     *
+     * <p>
+     * Nur der Ersteller darf seinen eigenen Request stornieren.
+     * </p>
+     */
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
+    public ResponseEntity<RequestResponseDto> cancelRequest(@PathVariable UUID id,
+                                                            Authentication authentication) {
 
-    private com.portfolio.workflow.user.domain.model.User getCurrentUser(Authentication authentication) {
+        var currentUser = getCurrentUser(authentication);
+
+        Request updatedRequest = requestService.cancelRequest(id, currentUser);
+
+        return ResponseEntity.ok(RequestApplicationMapper.toResponseDto(updatedRequest));
+    }
+
+    private User getCurrentUser(Authentication authentication) {
         String currentUserEmail = authentication.getName();
 
         return userService.findByEmail(currentUserEmail)

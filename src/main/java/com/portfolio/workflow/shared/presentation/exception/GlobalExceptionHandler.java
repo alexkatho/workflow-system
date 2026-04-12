@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.portfolio.workflow.request.application.exception.InvalidRequestStateException;
+import com.portfolio.workflow.request.application.exception.RequestAccessDeniedException;
 import com.portfolio.workflow.request.application.exception.RequestNotFoundException;
 import com.portfolio.workflow.user.application.exception.CurrentUserNotFoundException;
 import com.portfolio.workflow.user.application.exception.DuplicateEmailException;
@@ -107,6 +108,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCurrentUserNotFound(CurrentUserNotFoundException ex,
                                                                    HttpServletRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
+    }
+    
+    @ExceptionHandler(RequestAccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleRequestAccessDenied(RequestAccessDeniedException ex,
+                                                                  HttpServletRequest request) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), request.getRequestURI());
     }
 
     /**

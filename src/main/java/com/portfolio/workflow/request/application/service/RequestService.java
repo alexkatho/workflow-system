@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.portfolio.workflow.request.application.exception.InvalidRequestStateException;
+import com.portfolio.workflow.request.application.exception.RequestAccessDeniedException;
 import com.portfolio.workflow.request.application.exception.RequestNotFoundException;
 import com.portfolio.workflow.request.domain.model.Request;
 import com.portfolio.workflow.request.domain.model.RequestStatus;
@@ -130,6 +131,47 @@ public class RequestService {
         );
 
         return requestRepository.save(updatedRequest);
+    }
+    
+    /**
+     * Storniert einen offenen Request.
+     *
+     * <p>
+     * Nur der Ersteller des Requests darf den Request stornieren.
+     * Ein Cancel ist nur im Status PENDING erlaubt.
+     * </p>
+     *
+     * @param requestId ID des Requests
+     * @param currentUser aktueller Benutzer
+     * @return aktualisierter Request
+     */
+    public Request cancelRequest(UUID requestId, User currentUser) {
+        Request existingRequest = findExistingRequest(requestId);
+
+        ensureRequestOwner(existingRequest, currentUser);
+        ensurePendingRequest(requestId, existingRequest, "storniert");
+
+        Request updatedRequest = new Request(
+                existingRequest.getId(),
+                existingRequest.getTitle(),
+                existingRequest.getDescription(),
+                existingRequest.getType(),
+                RequestStatus.CANCELLED,
+                existingRequest.getCreatedBy(),
+                existingRequest.getDecidedBy(),
+                existingRequest.getDecisionComment(),
+                existingRequest.getDecidedAt(),
+                existingRequest.getCreatedAt(),
+                LocalDateTime.now()
+        );
+
+        return requestRepository.save(updatedRequest);
+    }
+    
+    private void ensureRequestOwner(Request request, User currentUser) {
+        if (!request.getCreatedBy().equals(currentUser.getId())) {
+            throw new RequestAccessDeniedException(request.getId());
+        }
     }
 
     private Request findExistingRequest(UUID requestId) {
