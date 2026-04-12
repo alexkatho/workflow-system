@@ -14,6 +14,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.portfolio.workflow.request.application.exception.InvalidRequestStateException;
+import com.portfolio.workflow.request.application.exception.RequestNotFoundException;
+import com.portfolio.workflow.user.application.exception.CurrentUserNotFoundException;
 import com.portfolio.workflow.user.application.exception.DuplicateEmailException;
 import com.portfolio.workflow.user.application.exception.DuplicateUsernameException;
 import com.portfolio.workflow.user.application.exception.InactiveUserException;
@@ -86,6 +89,24 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAccessDenied(Exception ex,
                                                             HttpServletRequest request) {
         return buildResponse(HttpStatus.FORBIDDEN, "Zugriff verweigert", request.getRequestURI());
+    }
+    
+    @ExceptionHandler(RequestNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleRequestNotFound(RequestNotFoundException ex,
+                                                               HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(InvalidRequestStateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRequestState(InvalidRequestStateException ex,
+                                                                   HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(CurrentUserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCurrentUserNotFound(CurrentUserNotFoundException ex,
+                                                                   HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
     }
 
     /**

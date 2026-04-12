@@ -43,7 +43,7 @@ public class UserApplicationMapper {
 
 	/** Domain User → UserResponseDto */
 	public static UserResponseDto toResponseDto(User user) {
-		return new UserResponseDto(user.getId(), user.getUsername(), user.getEmail(), user.getRole().name(),
-				user.getStatus().name());
+		return new UserResponseDto(user.getId(), user.getUsername(), user.getEmail(), user.getRole(),
+				user.getStatus());
 	}
 }
