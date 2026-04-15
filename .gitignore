@@ -36,6 +36,7 @@ build/
 # Environment files (Secrets)
 .env
 .env.*  # z.B. .env.prod, .env.dev
+!.env.example
 
 # Database initialization / generated files (optional)
 db-init/*.sql

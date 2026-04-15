@@ -1,29 +1,29 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/workflow
-    username: postgres
-    password: garfield26
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/workflow}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:garfield26}
     driver-class-name: org.postgresql.Driver
 
   sql:
     init:
-      mode: always
-      schema-locations: classpath:db-init/init.sql
-      continue-on-error: true
+      mode: ${SPRING_SQL_INIT_MODE:always}
+      schema-locations: ${SPRING_SQL_INIT_SCHEMA_LOCATIONS:classpath:db-init/init.sql}
+      continue-on-error: ${SPRING_SQL_INIT_CONTINUE_ON_ERROR:true}
 
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
     properties:
-      hibernate.format_sql: true
-      hibernate.default_schema: workflow
+      hibernate.format_sql: ${SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL:true}
+      hibernate.default_schema: ${SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA:workflow}
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
-      group-id: workflow-group
-      auto-offset-reset: earliest
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:workflow-group}
+      auto-offset-reset: ${SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET:earliest}
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
@@ -33,7 +33,7 @@ spring:
 security:
   jwt:
     secret: ${JWT_SECRET:my-super-secret-key-my-super-secret-key}
-    expiration: 3600000
+    expiration: ${JWT_EXPIRATION:3600000}
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
