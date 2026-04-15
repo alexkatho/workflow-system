@@ -163,8 +163,8 @@ Für Tests ist ein Admin-User vorhanden:
 1. Admin erstellt User
 2. User erstellt Request
 3. Manager/Admin:
-  -  genehmigt oder
-  -  lehnt ab
+   - genehmigt oder
+   - lehnt ab
 4. Event wird an Kafka gesendet
 
 ###  🔹 Konfiguration
